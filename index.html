@@ -496,27 +496,27 @@
         <h2>Feedback</h2>
         <div class="contact-feedback-container">
           <div class="feedback-form-wrapper">
-            <form id="feedback-form" class="modern-form">
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="name">Name</label>
-                  <input type="text" id="name" name="name" placeholder="Your Name" required>
-                </div>
-                <div class="form-group">
-                  <label for="email">Email</label>
-                  <input type="email" id="email" name="email" placeholder="Your Email" required>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="country">Country</label>
-                <input type="text" id="country" name="country" placeholder="Your Country" required>
-              </div>
-              <div class="form-group">
-                <label for="feedback">Feedback</label>
-                <textarea id="feedback" name="feedback" placeholder="Your Message" rows="4" required></textarea>
-              </div>
-              <button type="submit" class="submit-btn highlight-btn">Send Feedback</button>
-            </form>
+
+
+
+            
+          <form action="https://formspree.io/f/yourID" method="POST">
+  
+  <label>Name:</label><br>
+  <input type="text" name="name" required><br><br>
+
+  <label>Email:</label><br>
+  <input type="email" name="email" required><br><br>
+
+  <label>Feedback:</label><br>
+  <textarea name="message" rows="5" required></textarea><br><br>
+
+  <button type="submit">Submit Feedback</button>
+
+</form>
+
+            
+            
           </div>
         </div>
       </div>
