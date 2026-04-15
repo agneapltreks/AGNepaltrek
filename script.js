@@ -116,48 +116,57 @@ document.addEventListener('DOMContentLoaded', () => {
     // FORM HANDLING (SAFE + REALISTIC)
     // ===============================
     if (feedbackForm) {
-        feedbackForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+        feedbackForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-            const btn = feedbackForm.querySelector('.submit-btn');
-            if (!btn) return;
+    const btn = feedbackForm.querySelector('.submit-btn');
+    if (!btn) return;
 
-            const originalText = btn.textContent;
+    const originalText = btn.textContent;
 
-            const formData = new FormData(feedbackForm);
+    const formData = new FormData(feedbackForm);
 
-            // Check empty form
-            let hasValue = false;
-            for (let value of formData.values()) {
-                if (value.trim() !== "") {
-                    hasValue = true;
-                    break;
-                }
-            }
-
-            if (!hasValue) {
-                alert("Please fill the form first!");
-                return;
-            }
-
-            // UI feedback
-            btn.textContent = "SENDING...";
-            btn.disabled = true;
-
-            setTimeout(() => {
-                btn.textContent = "MESSAGE SENT ✔";
-                btn.style.background = "#27ae60";
-
-                feedbackForm.reset();
-
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                    btn.style.background = "";
-                }, 2000);
-
-            }, 1000);
-        });
+    // Check empty form
+    let hasValue = false;
+    for (let value of formData.values()) {
+        if (value.trim() !== "") {
+            hasValue = true;
+            break;
+        }
     }
 
+    if (!hasValue) {
+        alert("Please fill the form first!");
+        return;
+    }
+
+    btn.textContent = "SENDING...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(feedbackForm.action, {
+            method: "POST",
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            btn.textContent = "MESSAGE SENT ✔";
+            btn.style.background = "#27ae60";
+            feedbackForm.reset();
+        } else {
+            alert("Something went wrong. Try again.");
+        }
+
+    } catch (error) {
+        alert("Network error. Try again.");
+    }
+
+    setTimeout(() => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+        btn.style.background = "";
+    }, 2000);
 });
