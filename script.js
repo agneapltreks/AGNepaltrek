@@ -1,94 +1,148 @@
-// --- Original Functionality Preserved ---
+// ===============================
+// TIME DISPLAY (SAFE)
+// ===============================
 function showTime() {
     const timeDisplay = document.getElementById('currentTime');
-    if (timeDisplay) {
-        timeDisplay.innerHTML = new Date().toUTCString();
-    }
+    if (!timeDisplay) return;
+
+    timeDisplay.textContent = new Date().toUTCString();
 }
+
 showTime();
 setInterval(showTime, 1000);
 
-// --- Modern Interactivity Enhancements ---
 
+// ===============================
+// MAIN SCRIPT
+// ===============================
 document.addEventListener('DOMContentLoaded', () => {
+
     const navbar = document.querySelector('.navbar');
     const menuToggle = document.querySelector('.menu-toggle');
     const navMenu = document.querySelector('.nav-menu');
     const navLinks = document.querySelectorAll('.nav-menu a');
     const sections = document.querySelectorAll('.section');
+    const feedbackForm = document.getElementById('feedback-form');
 
-    // 1. Sticky Navbar Effect on Scroll
+
+    // ===============================
+    // 1. STICKY NAVBAR + ACTIVE LINK
+    // ===============================
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
+
+        // Navbar scroll effect (SAFE)
+        if (navbar) {
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
         }
 
-        // 2. Active Link Highlighting on Scroll
+        // Active section detection
         let current = "";
+
         sections.forEach(section => {
             const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
-            if (pageYOffset >= (sectionTop - 150)) {
+            const sectionHeight = section.offsetHeight;
+
+            if (window.scrollY >= sectionTop - 150) {
                 current = section.getAttribute('id');
             }
         });
 
         navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href').includes(current)) {
-                link.classList.add('active');
-            }
+            const href = link.getAttribute('href') || "";
+
+            link.classList.toggle(
+                'active',
+                current && href === `#${current}`
+            );
         });
     });
 
-    // 3. Mobile Menu Toggle
-    menuToggle.addEventListener('click', () => {
-        menuToggle.classList.toggle('active');
-        navMenu.classList.toggle('active');
-    });
 
-    // Close menu when a link is clicked (Mobile)
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            menuToggle.classList.remove('active');
-            navMenu.classList.remove('active');
-        });
-    });
-
-    // 4. Reveal on Scroll Animation (Intersection Observer)
-    const revealCallback = (entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('active');
-                observer.unobserve(entry.target); // Only reveal once
-            }
-        });
-    };
-
-    const revealObserver = new IntersectionObserver(revealCallback, {
-        threshold: 0.15
-    });
-
-    const revealElements = document.querySelectorAll('.reveal');
-    revealElements.forEach(el => revealObserver.observe(el));
-
-    // 5. Form Handling (Optional visual feedback)
-    const feedbackForm = document.getElementById('feedback-form');
-    if (feedbackForm) {
-        feedbackForm.addEventListener('submit', (e) => {
-            
-            const btn = feedbackForm.querySelector('.submit-btn');
-            const originalText = btn.textContent;
-            btn.textContent = 'MESSAGE SENT!';
-            btn.style.background = '#27ae60';
-            feedbackForm.reset();
-            
-            setTimeout(() => {
-                btn.textContent = originalText;
-                btn.style.background = '';
-            }, 3000);
+    // ===============================
+    // 2. MOBILE MENU (SAFE)
+    // ===============================
+    if (menuToggle && navMenu) {
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            navMenu.classList.toggle('active');
         });
     }
+
+
+    // Close menu on link click
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            menuToggle?.classList.remove('active');
+            navMenu?.classList.remove('active');
+        });
+    });
+
+
+    // ===============================
+    // 3. REVEAL ON SCROLL (OK)
+    // ===============================
+    const revealElements = document.querySelectorAll('.reveal');
+
+    if (revealElements.length > 0) {
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        revealElements.forEach(el => observer.observe(el));
+    }
+
+
+    // ===============================
+    // 4. FORM HANDLING (FIXED LOGIC)
+    // ===============================
+    if (feedbackForm) {
+        feedbackForm.addEventListener('submit', (e) => {
+
+            e.preventDefault(); // IMPORTANT FIX
+
+            const btn = feedbackForm.querySelector('.submit-btn');
+            if (!btn) return;
+
+            const originalText = btn.textContent;
+
+            // Prevent empty submission
+            const formData = new FormData(feedbackForm);
+
+            let isEmpty = true;
+            for (let value of formData.values()) {
+                if (value.trim() !== "") {
+                    isEmpty = false;
+                    break;
+                }
+            }
+
+            if (isEmpty) {
+                alert("Please fill the form first!");
+                return;
+            }
+
+            // UI feedback
+            btn.textContent = 'SENDING...';
+            btn.style.background = '#f39c12';
+
+            setTimeout(() => {
+                btn.textContent = 'MESSAGE SENT ✔';
+                btn.style.background = '#27ae60';
+
+                feedbackForm.reset();
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+
+            }, 1000);
+        });
+    }
+
 });
