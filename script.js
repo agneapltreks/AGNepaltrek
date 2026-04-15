@@ -1,5 +1,5 @@
 // ===============================
-// TIME DISPLAY (SAFE)
+// TIME DISPLAY
 // ===============================
 function showTime() {
     const timeDisplay = document.getElementById('currentTime');
@@ -24,42 +24,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const sections = document.querySelectorAll('.section');
     const feedbackForm = document.getElementById('feedback-form');
 
+    let ticking = false;
+
 
     // ===============================
-    // 1. STICKY NAVBAR + ACTIVE LINK
+    // SCROLL HANDLER (OPTIMIZED)
     // ===============================
-    window.addEventListener('scroll', () => {
+    function handleScroll() {
+        const scrollY = window.scrollY;
 
-        // Navbar scroll effect (SAFE)
+        // Navbar effect
         if (navbar) {
-            navbar.classList.toggle('scrolled', window.scrollY > 50);
+            navbar.classList.toggle('scrolled', scrollY > 50);
         }
 
         // Active section detection
-        let current = "";
+        let currentSection = "";
 
         sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
+            const top = section.offsetTop;
+            const height = section.offsetHeight;
 
-            if (window.scrollY >= sectionTop - 150) {
-                current = section.getAttribute('id');
+            if (scrollY >= top - 200 && scrollY < top + height - 200) {
+                currentSection = section.id;
             }
         });
 
+        // Active link update
         navLinks.forEach(link => {
-            const href = link.getAttribute('href') || "";
+            const href = link.getAttribute('href');
 
-            link.classList.toggle(
-                'active',
-                current && href === `#${current}`
-            );
+            if (href === `#${currentSection}`) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
         });
+
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            requestAnimationFrame(handleScroll);
+            ticking = true;
+        }
     });
 
 
     // ===============================
-    // 2. MOBILE MENU (SAFE)
+    // MOBILE MENU TOGGLE
     // ===============================
     if (menuToggle && navMenu) {
         menuToggle.addEventListener('click', () => {
@@ -67,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
             navMenu.classList.toggle('active');
         });
     }
-
 
     // Close menu on link click
     navLinks.forEach(link => {
@@ -79,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ===============================
-    // 3. REVEAL ON SCROLL (OK)
+    // REVEAL ON SCROLL
     // ===============================
     const revealElements = document.querySelectorAll('.reveal');
 
@@ -91,54 +104,56 @@ document.addEventListener('DOMContentLoaded', () => {
                     obs.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.15 });
+        }, {
+            threshold: 0.15
+        });
 
         revealElements.forEach(el => observer.observe(el));
     }
 
 
     // ===============================
-    // 4. FORM HANDLING (FIXED LOGIC)
+    // FORM HANDLING (SAFE + REALISTIC)
     // ===============================
     if (feedbackForm) {
         feedbackForm.addEventListener('submit', (e) => {
-
-            e.preventDefault(); // IMPORTANT FIX
+            e.preventDefault();
 
             const btn = feedbackForm.querySelector('.submit-btn');
             if (!btn) return;
 
             const originalText = btn.textContent;
 
-            // Prevent empty submission
             const formData = new FormData(feedbackForm);
 
-            let isEmpty = true;
+            // Check empty form
+            let hasValue = false;
             for (let value of formData.values()) {
                 if (value.trim() !== "") {
-                    isEmpty = false;
+                    hasValue = true;
                     break;
                 }
             }
 
-            if (isEmpty) {
+            if (!hasValue) {
                 alert("Please fill the form first!");
                 return;
             }
 
             // UI feedback
-            btn.textContent = 'SENDING...';
-            btn.style.background = '#f39c12';
+            btn.textContent = "SENDING...";
+            btn.disabled = true;
 
             setTimeout(() => {
-                btn.textContent = 'MESSAGE SENT ✔';
-                btn.style.background = '#27ae60';
+                btn.textContent = "MESSAGE SENT ✔";
+                btn.style.background = "#27ae60";
 
                 feedbackForm.reset();
 
                 setTimeout(() => {
                     btn.textContent = originalText;
-                    btn.style.background = '';
+                    btn.disabled = false;
+                    btn.style.background = "";
                 }, 2000);
 
             }, 1000);
