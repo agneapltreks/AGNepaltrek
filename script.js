@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const feedbackForm = document.getElementById('feedback-form');
     if (feedbackForm) {
         feedbackForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+            
             const btn = feedbackForm.querySelector('.submit-btn');
             const originalText = btn.textContent;
             btn.textContent = 'MESSAGE SENT!';
